@@ -62,7 +62,7 @@ function closeHelp() {
 
 function showIntro() {
     let introDialog = document.createElement('div')
-    introDialog.classList.add('modal', 'help-modal')
+    introDialog.classList.add('modal', 'intro-modal')
     introDialog.innerHTML =
         '<button class="close-intro"><i class="icon-lg icon-close"></i></button>\
         <h1>Hi!</h1>\
