@@ -31,8 +31,8 @@ function showHelp() {
         <h1>When editing paths:</h1>\
         <ul>\
             <li>Drag nodes to move them</li>\
-            <li>Use <b>alt</b> to insert nodes</li>\
-            <li>Use <b>shift</b> to delete nodes</li>\
+            <li>Use <b>alt</b> or <b>cmd</b> to insert nodes</li>\
+            <li>Use <b>shift</b> or <b>ctrl</b> to delete nodes</li>\
         </ul>\
         <h1>Sidebar</h1>\
         <ul>\

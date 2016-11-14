@@ -22,9 +22,11 @@ class Editor {
         this.handleBodyGestures()
 
         window.addEventListener('keydown', e => {
-            this.altPressed = e.altKey; this.shiftPressed = e.shiftKey; this.redrawCanvas()})
+            this.altPressed = e.altKey || e.metaKey;
+            this.shiftPressed = e.shiftKey || e.ctrlKey; this.redrawCanvas()})
         window.addEventListener('keyup', e => {
-            this.altPressed = e.altKey; this.shiftPressed = e.shiftKey; this.redrawCanvas()})
+            this.altPressed = e.altKey || e.metaKey;
+            this.shiftPressed = e.shiftKey || e.ctrlKey; this.redrawCanvas()})
         window.addEventListener('keypress', e => {
             if (e.charCode == 122 && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
                 // Cmd-Z or Ctrl-Z
@@ -200,6 +202,8 @@ class Editor {
         listControlRow.innerHTML = ''
 
         let addPathButton = document.createElement('button')
+        addPathButton.setAttribute('data-balloon', 'New Path')
+        addPathButton.setAttribute('data-balloon-pos', 'down')
         addPathButton.appendChild(this.iconEl('path', false))
         listControlRow.appendChild(addPathButton)
         addPathButton.addEventListener('click', e => {
@@ -211,6 +215,8 @@ class Editor {
         })
 
         let addPrecisePathButton = document.createElement('button')
+        addPrecisePathButton.setAttribute('data-balloon', 'New Precise Path')
+        addPrecisePathButton.setAttribute('data-balloon-pos', 'down')
         addPrecisePathButton.appendChild(this.iconEl('precise-path', false))
         listControlRow.appendChild(addPrecisePathButton)
         addPrecisePathButton.addEventListener('click', e => {
@@ -222,6 +228,8 @@ class Editor {
         })
 
         let addCircleButton = document.createElement('button')
+        addCircleButton.setAttribute('data-balloon', 'New Circle')
+        addCircleButton.setAttribute('data-balloon-pos', 'down')
         addCircleButton.appendChild(this.iconEl('circle', false))
         listControlRow.appendChild(addCircleButton)
         addCircleButton.addEventListener('click', e => {
@@ -234,6 +242,9 @@ class Editor {
         })
 
         let undoButton = document.createElement('button')
+        undoButton.setAttribute('data-balloon', 'Undo ⌘Z')
+        undoButton.setAttribute('data-balloon-pos', 'down')
+        undoButton.setAttribute('data-balloon-length', 'tiny')
         undoButton.classList.add('undo-button')
         undoButton.appendChild(this.iconEl('undo', false))
         if (this.history.length <= 1)
@@ -244,6 +255,9 @@ class Editor {
         })
 
         let redoButton = document.createElement('button')
+        redoButton.setAttribute('data-balloon', 'Redo ⌘⇧Z')
+        redoButton.setAttribute('data-balloon-pos', 'down')
+        redoButton.setAttribute('data-balloon-length', 'tiny')
         redoButton.classList.add('redo-button')
         redoButton.appendChild(this.iconEl('redo', false))
         if (this.future.length == 0)
@@ -274,6 +288,8 @@ class Editor {
             itemSettings.classList.add('item-settings')
 
             let hiddenToggle = document.createElement('button')
+            hiddenToggle.setAttribute('data-balloon', 'Toggle Visibility')
+            hiddenToggle.setAttribute('data-balloon-pos', 'down')
             itemHeader.appendChild(hiddenToggle)
             hiddenToggle.innerHTML = (command.flags.hidden ? this.icon('hidden') : this.icon('visible'))
             hiddenToggle.addEventListener('click', (ev) => {
@@ -287,6 +303,8 @@ class Editor {
             })
 
             let deleteButton = document.createElement('button')
+            deleteButton.setAttribute('data-balloon', 'Delete')
+            deleteButton.setAttribute('data-balloon-pos', 'down')
             itemHeader.appendChild(deleteButton)
             deleteButton.innerHTML = this.icon('delete')
             deleteButton.addEventListener('click', (ev) => {
@@ -311,6 +329,9 @@ class Editor {
                 buttonRow.appendChild(typeToggle)
                 typeToggle.innerHTML = this.icon(
                     type == 'precise-path' ? 'make-path' : 'make-precise')
+                typeToggle.setAttribute('data-balloon', type == 'precise-path'
+                    ? 'Convert to Path' : 'Convert to Precise Path')
+                typeToggle.setAttribute('data-balloon-pos', 'down')
                 typeToggle.addEventListener('click', (ev) => {
                     if (type == 'precise-path')
                         commands[i] = command.toPath()
@@ -322,17 +343,22 @@ class Editor {
                     this.redrawCanvas()
                 })
                 let openToggle = document.createElement('button')
+                openToggle.setAttribute('data-balloon-pos', 'down')
                 buttonRow.appendChild(openToggle)
                 if (command.pathOpen)
-                    openToggle.innerHTML = this.icon('path-open')
+                    openToggle.setAttribute('data-balloon', 'Open'),
+                        openToggle.innerHTML = this.icon('path-open')
                 else
-                    openToggle.innerHTML = this.icon('path-closed')
+                    openToggle.setAttribute('data-balloon', 'Closed'),
+                        openToggle.innerHTML = this.icon('path-closed')
                 openToggle.addEventListener('click', (ev) => {
                     command.pathOpen ^= 1
                     if (command.pathOpen)
-                        openToggle.innerHTML = this.icon('path-open')
+                        openToggle.setAttribute('data-balloon', 'Open'),
+                            openToggle.innerHTML = this.icon('path-open')
                     else
-                        openToggle.innerHTML = this.icon('path-closed')
+                        openToggle.setAttribute('data-balloon', 'Closed'),
+                            openToggle.innerHTML = this.icon('path-closed')
                     this.pushHistoryState()
                     ev.stopPropagation()
                     this.redrawCanvas()
@@ -341,7 +367,11 @@ class Editor {
             } else if (type == 'circle') {
                 let radiusControlEl = document.createElement('div')
                 radiusControlEl.classList.add('radius-control', 'slider-row')
-                radiusControlEl.appendChild(this.iconEl('radius'))
+
+                let radiusIcon = this.iconEl('radius')
+                radiusControlEl.appendChild(radiusIcon)
+                radiusIcon.setAttribute('data-balloon', 'Radius')
+                radiusIcon.setAttribute('data-balloon-pos', 'right')
 
                 let radiusEl = document.createElement('input')
                 let radiusSliderEl = document.createElement('input')
@@ -373,7 +403,10 @@ class Editor {
 
             let strokeWidthControlEl = document.createElement('div')
             strokeWidthControlEl.classList.add('stroke-width-control', 'slider-row')
-            strokeWidthControlEl.appendChild(this.iconEl('stroke-width'))
+            let strokeWidthIcon = this.iconEl('stroke-width')
+            strokeWidthControlEl.appendChild(strokeWidthIcon)
+            strokeWidthIcon.setAttribute('data-balloon', 'Stroke')
+            strokeWidthIcon.setAttribute('data-balloon-pos', 'right')
 
             let strokeWidthEl = document.createElement('input')
             let strokeWidthSliderEl = document.createElement('input')
@@ -535,6 +568,8 @@ class Editor {
         zoomEl.classList.add('zoom')
         let zoomInfoEl = document.createElement('span')
         zoomInfoEl.classList.add('zoom-info')
+        zoomInfoEl.setAttribute('data-balloon', 'Zoom')
+        zoomInfoEl.setAttribute('data-balloon-pos', 'top')
 
         zoomEl.type = 'range'
         zoomEl.min = 1; zoomEl.max = 32; zoomEl.step = 1

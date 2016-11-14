@@ -15,9 +15,13 @@ class Picker {
         this.fileNameEl.innerText = this.fileName = ''
         this.el.appendChild(this.fileNameEl)
         this.newButton = document.createElement('button')
+        this.newButton.setAttribute('data-balloon', 'New')
+        this.newButton.setAttribute('data-balloon-pos', 'down')
         this.newButton.innerHTML = '<i class="icon icon-new"></i>'
         this.el.appendChild(this.newButton)
         this.saveButton = document.createElement('button')
+        this.saveButton.setAttribute('data-balloon', 'Save')
+        this.saveButton.setAttribute('data-balloon-pos', 'down')
         this.saveButton.disabled = true
         this.saveButton.innerHTML = '<i class="icon icon-download"></i>'
         this.el.appendChild(this.saveButton)
@@ -50,6 +54,7 @@ class Picker {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
             ctx.font = '12pt "-apple-system", BlinkMacSystemFont, ".SFNSDisplay-Regular", Helvetica'
             ctx.textAlign = 'center'
+            console.log(e.dataTransfer)
             if (success)
                 ctx.fillText(this.fileName + '.pdc', 500, 20)
             else
