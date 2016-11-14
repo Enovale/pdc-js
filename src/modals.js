@@ -60,33 +60,6 @@ function closeHelp() {
         helpDialog.parentNode.removeChild(helpDialog)
 }
 
-function showIntro() {
-    let introDialog = document.createElement('div')
-    introDialog.classList.add('modal', 'intro-modal')
-    introDialog.innerHTML =
-        '<button class="close-intro"><i class="icon-lg icon-close"></i></button>\
-        <h1>Hi!</h1>\
-        <p>This is a technical demo of a JS-based editor for <a href="' +
-            'https://developer.pebble.com/guides/app-resources/pdc-format/' +
-            '#pebble-draw-command-list">PDC</a> files. Its code is currently a\
-            total mess, but it works!</p>\
-        <p>This editor has been tested on Safari 10, Chrome 54, and Firefox 49\
-            under macOS Sierra. Should you experience any issues, please open\
-            an issue <a href="https://github.com/jneubrand/pdc-js">on Github.\
-            </a></p>\
-        '
-    introDialog.querySelector('.close-intro').addEventListener('click', e => {
-        closeIntro()
-    })
-    document.body.appendChild(introDialog)
-}
-
-function closeIntro() {
-    let introDialogs = document.querySelectorAll('.intro-modal')
-    for (let introDialog of introDialogs)
-        introDialog.parentNode.removeChild(introDialog)
-}
-
 function generateExampleFileLoader() {
     let button = document.createElement('button')
     button.classList.add('stealth')
