@@ -151,8 +151,8 @@ class Editor {
     }
     updateCanvasScaleWithFactor(scale) {
         this.canvasScale = Math.round(this.canvasScaleSaved * scale * 100) / 100
-        if (this.canvasScale > 32)
-            this.canvasScale = 32
+        if (this.canvasScale > 48)
+            this.canvasScale = 48
         if (this.canvasScale < 1)
             this.canvasScale = 1
         this.updateControls()
@@ -380,7 +380,7 @@ class Editor {
                 radiusSliderEl.min = 1, radiusSliderEl.max = 50, radiusSliderEl.step = 1
                 radiusSliderEl.value = commands[i].radius
                 radiusSliderEl.addEventListener('input', (e) => {
-                    commands[i].radius = radiusSliderEl.value
+                    commands[i].radius = parseInt(radiusSliderEl.value)
                     radiusEl.value = radiusSliderEl.value
                     this.replaceHistoryStateIfReasonOrPush('radius' + this.selectedCommand)
                     this.redrawCanvas()
@@ -390,7 +390,7 @@ class Editor {
                 radiusEl.min = 1, radiusEl.max = 250, radiusEl.step = 1
                 radiusEl.value = commands[i].radius
                 radiusEl.addEventListener('input', (e) => {
-                    commands[i].radius = radiusEl.value
+                    commands[i].radius = parseInt(radiusEl.value)
                     radiusSliderEl.value = radiusEl.value
                     this.replaceHistoryStateIfReasonOrPush('radius' + this.selectedCommand)
                     this.redrawCanvas()
@@ -576,7 +576,7 @@ class Editor {
         zoomInfoEl.setAttribute('data-balloon-pos', 'top')
 
         zoomEl.type = 'range'
-        zoomEl.min = 1; zoomEl.max = 32; zoomEl.step = 1
+        zoomEl.min = 1; zoomEl.max = 48; zoomEl.step = 1
         zoomEl.value = this.canvasScale
         zoomInfoEl.innerText = Math.floor(this.canvasScale) + '.' +
                                Math.floor(this.canvasScale % 1 * 10) + '×'
