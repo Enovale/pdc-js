@@ -101,7 +101,7 @@ body {
 }
 
 .sidebar {
-    max-width: 12rem;
+    width: 12rem;
     flex-shrink: 0;
     border-left: 1px solid #DDD;
     padding: 0;
