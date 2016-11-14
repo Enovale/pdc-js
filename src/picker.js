@@ -32,6 +32,9 @@ class Picker {
         this.saveButton.disabled = false
         this.el.querySelector('.help-button').classList.remove('pinging')
     }
+    finishInitialization() {
+        this.loadData(atob('UERDSQgAAAABADIAMgAAAA=='), 'Untitled')
+    }
     applyEventListeners() {
         this.el.draggable = true
         this.el.addEventListener('dragstart', e => {
