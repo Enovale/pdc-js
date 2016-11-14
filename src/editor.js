@@ -16,7 +16,6 @@ class Editor {
         [this.el, this.picker] = [el, picker]
         el.innerHTML = ''
         el.classList.add('empty')
-        el.appendChild(generateExampleFileLoader())
         this.picker.subscribe((a) => this.updateEditorFromData(a))
         this.picker.setDataSource(a => this.image.getBinaryRepresentation())
 
@@ -40,6 +39,8 @@ class Editor {
                 e.preventDefault()
             }
         }, false)
+
+        this.picker.finishInitialization()
     }
     icon(name, large) {
         return '<i class="' + (large ? 'icon-lg' : 'icon') + ' icon-' + name + '"></i>'
