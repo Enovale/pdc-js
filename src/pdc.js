@@ -97,7 +97,7 @@ class PDCCircleCommand extends PDCCommand {
         for (let point of this.points) {
             ctx.beginPath()
             ctx.ellipse(point[0] * scale + offset[0], point[1] * scale + offset[1],
-                this.radius * scale, this.radius * scale],
+                this.radius * scale, this.radius * scale,
                 0, 0, 2 * Math.PI)
             ctx.fill()
             ctx.stroke()
