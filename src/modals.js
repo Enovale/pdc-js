@@ -64,7 +64,7 @@ function showIntro() {
     let introDialog = document.createElement('div')
     introDialog.classList.add('modal', 'help-modal')
     introDialog.innerHTML =
-        '<button class="close-modal"><i class="icon-lg icon-close"></i></button>\
+        '<button class="close-intro"><i class="icon-lg icon-close"></i></button>\
         <h1>Hi!</h1>\
         <p>This is a technical demo of a JS-based editor for <a href="' +
             'https://developer.pebble.com/guides/app-resources/pdc-format/' +
@@ -72,9 +72,10 @@ function showIntro() {
             total mess, but it works!</p>\
         <p>This editor has been tested on Safari 10, Chrome 54, and Firefox 49\
             under macOS Sierra. Should you experience any issues, please open\
-            an issue <a href="https://github.com/jneubrand/pdc-js">on Github</a></p>\
+            an issue <a href="https://github.com/jneubrand/pdc-js">on Github.\
+            </a></p>\
         '
-    introDialog.querySelector('.close-modal').addEventListener('click', e => {
+    introDialog.querySelector('.close-intro').addEventListener('click', e => {
         closeIntro()
     })
     document.body.appendChild(introDialog)
