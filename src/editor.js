@@ -6,6 +6,7 @@ class Editor {
         this.movingPoint = null
         this.canvasScaleSaved = 8
         this.canvasScale = 8
+        this.pixelRatio = window.devicePixelRatio || 1
         this.shiftPressed = false
         this.altPressed = false
         let { el, picker } = args
@@ -695,8 +696,8 @@ class Editor {
         ctx.strokeStyle = strokeColor
         ctx.lineWidth = 1
         ctx.beginPath()
-        ctx.ellipse(point[0] * this.canvasScale + offset[0],
-                    point[1] * this.canvasScale + offset[1],
+        ctx.ellipse(point[0] * this.pixelRatio * this.canvasScale + offset[0],
+                    point[1] * this.pixelRatio * this.canvasScale + offset[1],
                     radius, radius, 0, 0, 2 * Math.PI)
         ctx.fill()
         ctx.stroke()
@@ -714,10 +715,13 @@ class Editor {
     }
     redrawCanvas(ev) {
         if (!this.image) return
-        this.canvas.height = (this.image.height + 2) * this.canvasScale
-        this.canvas.width = (this.image.width + 2) * this.canvasScale
-        this.canvasOffset = [this.canvasScale * 1.5, this.canvasScale * 1.5]
-        let ctx = this.canvas.getContext('2d')
+        this.canvas.height = (this.image.height + 2) * this.canvasScale * this.pixelRatio
+        this.canvas.width = (this.image.width + 2) * this.canvasScale * this.pixelRatio
+        this.canvas.style.height = (this.image.height + 2) * this.canvasScale + 'px'
+        this.canvas.style.width = (this.image.width + 2) * this.canvasScale + 'px'
+        let ctx = this.canvas.getContext('2d'),
+            scale = this.canvasScale * this.pixelRatio
+        this.canvasOffset = [scale * 1.5, scale * 1.5]
         if (this.selectedCommand !== null) {
             if (ev && this.movingPoint !== null && 'offsetX' in ev) {
                 let command = this.image.commands[this.selectedCommand],
@@ -734,7 +738,7 @@ class Editor {
             }
         }
         for (let command of this.image.commands) {
-            command.draw(ctx, this.canvasScale, this.canvasOffset)
+            command.draw(ctx, scale, this.canvasOffset)
         }
         if (this.selectedCommand !== null) {
             let closestPoint,
@@ -778,29 +782,29 @@ class Editor {
         ctx.lineWidth = 1
         ctx.beginPath()
         // horizontal midline
-        ctx.moveTo(0, (this.image.height + 2) * this.canvasScale / 2)
-        ctx.lineTo((this.image.width + 2) * this.canvasScale,
-                   (this.image.height + 2) * this.canvasScale / 2)
+        ctx.moveTo(0, (this.image.height + 2) * scale / 2)
+        ctx.lineTo((this.image.width + 2) * scale,
+                   (this.image.height + 2) * scale / 2)
         // vertical midline
-        ctx.moveTo((this.image.width + 2) * this.canvasScale / 2, 0)
-        ctx.lineTo((this.image.width + 2) * this.canvasScale / 2,
-                  (this.image.height + 2) * this.canvasScale)
+        ctx.moveTo((this.image.width + 2) * scale / 2, 0)
+        ctx.lineTo((this.image.width + 2) * scale / 2,
+                  (this.image.height + 2) * scale)
         // image border
-        ctx.moveTo(1 * this.canvasScale, 1 * this.canvasScale)
-        ctx.lineTo((this.image.width + 1) * this.canvasScale,
-                   1 * this.canvasScale)
-        ctx.lineTo((this.image.width + 1) * this.canvasScale,
-                   (this.image.height + 1) * this.canvasScale)
-        ctx.lineTo(1 * this.canvasScale,
-                   (this.image.height + 1) * this.canvasScale)
-        ctx.lineTo(1 * this.canvasScale, 1 * this.canvasScale)
+        ctx.moveTo(1 * scale, 1 * scale)
+        ctx.lineTo((this.image.width + 1) * scale,
+                   1 * scale)
+        ctx.lineTo((this.image.width + 1) * scale,
+                   (this.image.height + 1) * scale)
+        ctx.lineTo(1 * scale,
+                   (this.image.height + 1) * scale)
+        ctx.lineTo(1 * scale, 1 * scale)
         ctx.stroke()
-        if (this.canvasScale > 16) {
+        if (scale > 16) {
             for (let x = 0.5; x < this.image.width; x++)
                 for (let y = 0.5; y < this.image.height; y++) {
                     ctx.beginPath()
-                    ctx.fillRect((x + 1) * this.canvasScale - 1,
-                                (y + 1) * this.canvasScale - 1,
+                    ctx.fillRect((x + 1) * scale - 1,
+                                (y + 1) * scale - 1,
                                 2, 2)
                     ctx.fill()
                 }
