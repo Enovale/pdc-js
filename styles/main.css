@@ -1,0 +1,414 @@
+body {
+    font-family: -apple-system, ".SFNSDisplay-Regular", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+#main {
+    max-height: 100vh;
+}
+
+#picker {
+    position: relative;
+    display: flex;
+    background-color: #F8F8F8;
+    border-bottom: 1px solid #DDD;
+    padding-left: 0.5rem;
+    flex-shrink: 0;
+    min-height: 2rem;
+    display: flex;
+    color: #444;
+    align-items: center;
+    z-index: 1;
+    transition: min-height 0.2s ease, margin-bottom 0.2s ease;
+}
+
+#picker span {
+    flex-grow: 1
+}
+
+#picker.drop-target {
+    margin-bottom: -1rem;
+    min-height: 3rem;
+}
+
+#picker button {
+    background-color: transparent;
+    border: none;
+    text-align: center;
+    box-sizing: border-box;
+    border-radius: 0.75rem;
+    padding: 0.25rem;
+    margin: 0 0.25rem;
+    color: #222;
+    opacity: 0.6;
+}
+
+#picker button:disabled {
+    opacity: 0.2;
+}
+
+#picker button + button {
+    margin-left: 0;
+}
+
+#picker button:not(:disabled):hover,
+#picker button:not(:disabled):focus {
+    background-color: #CCC;
+}
+
+#picker button:not(:disabled):active {
+    background-color: #BBB;
+}
+
+#editor {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 10px;
+    align-items: stretch;
+    height: calc(100vh - 2rem - 1px);
+}
+
+#editor.empty {
+    align-items: center;
+    justify-content: center;
+}
+
+.main-view-wrapper {
+    max-height: 100vh;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: scroll;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+}
+
+.main-view {
+    border: 1px solid #EEE;
+    display: block;
+    height: auto;
+    margin: auto;
+    flex-grow: 0;
+    flex-shrink: 0;
+    cursor: default;
+}
+
+.sidebar {
+    flex-basis: 11rem;
+    flex-shrink: 0;
+    border-left: 1px solid #DDD;
+    padding: 0;
+    margin: 0;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+}
+
+.list-control-row {
+    padding: 0.5rem;
+    border-bottom: 1px solid #DDD;
+    display: flex;
+    flex-direction: row;
+    flex-shrink: 0;
+    flex-grow: 0;
+    justify-content: center;
+}
+
+.list-control-row .undo-button {
+    margin-left: auto;
+}
+
+.command-list {
+    margin: 0;
+    padding: 0.5rem;
+    flex-grow: 1;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+}
+
+.command-list li {
+    background-color: #DDD;
+    margin: 0;
+    list-style: none;
+    padding: 0.5rem;
+    border-radius: 0.2rem;
+    box-shadow: inset 0 -1px 0 0 #FFF, inset 0 0 0 0 #888;
+    transition: transform 0.1s linear, opacity 0.1s linear, padding 0.1s linear, box-shadow 0.1s linear;
+}
+
+.command-list li .item-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-height: calc(2rem + 2px);
+}
+
+.command-list li.selected .item-header {
+    margin-bottom: -1px;
+}
+
+.command-list li .item-header canvas {
+    max-height: 2rem;
+    max-width: 2.5rem;
+    border: 1px solid #AAA;
+    margin-left: auto;
+    flex-shrink: 1;
+}
+
+.command-list .item-settings {
+    border-top: 1px solid #AAA;
+    padding-top: 0.2rem;
+}
+
+.command-list .button-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.command-list .slider-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.command-list .slider-row input[type=range] {
+    flex-grow: 0;
+    width: 70px;
+}
+
+.command-list .slider-row input[type=number] {
+    width: 50px;
+}
+
+.command-list .selected {
+    background-color: #BBB;
+}
+
+.command-list .dragging {
+    transform: scale(0.9);
+    opacity: 0.5;
+}
+
+.command-list .shift-up.drop-target {
+    padding: calc(0.5rem - 2px) 0.5rem calc(0.5rem + 2px);
+    box-shadow: inset 0 -1px 0 0 #FFF, inset 0 -5px 0 0 #888;
+}
+
+.command-list .shift-down.drop-target {
+    padding: calc(0.5rem + 2px) 0.5rem calc(0.5rem - 2px);
+    box-shadow: inset 0 -1px 0 0 #FFF, inset 0 4px 0 0 #888;
+}
+
+.list-control-row button, .command-list button {
+    background-color: #FFF;
+    border: 1px solid #888;
+    border-radius: 0.2rem;
+    padding: 3px;
+    color: #222;
+}
+
+.list-control-row button:disabled i, .command-list button:disabled i {
+    opacity: 0.2;
+}
+
+.controls {
+    border-top: 1px solid #DDD;
+    padding: 0.5rem;
+}
+
+.controls .image-dimensions {
+    display: flex;
+    flex-direction: row;
+    max-width: 100%;
+    line-height: 2rem;
+    font-size: 1.4rem;
+}
+
+.controls .view-zoom {
+    display: flex;
+    flex-direction: row;
+    max-width: 100%;
+    padding-top: 0.5rem;
+}
+
+.controls .view-zoom input[type=range] {
+    width: 110px;
+    flex-basis: calc(100% - 5.5rem);
+    flex-grow: 0;
+}
+
+.controls .view-zoom span {
+    text-align: right;
+    flex-grow: 1;
+    font-size: 1.1rem;
+    font-feature-settings: "tnum";
+}
+
+input[type=number] {
+    max-width: calc(50% - 5px);
+    box-sizing: border-box;
+    width: auto;
+    flex-grow: 1;
+    border-radius: 0.2rem;
+    border: 1px solid #888;
+    padding: 0.3rem;
+    vertical-align: middle;
+    font-size: 1rem;
+    font-feature-settings: "tnum";
+}
+
+li:not(.selected) .item-settings {
+    display: none;
+}
+
+@keyframes ping {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0), inset 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+    30% {
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.5), inset 0 0 0 15px rgba(0, 0, 0, 0.5);
+    }
+    90% {
+        box-shadow: 0 0 0 2rem rgba(0, 0, 0, 0), inset 0 0 0 15px rgba(0, 0, 0, 0);
+    }
+}
+
+.help-button.pinging {
+    animation: ping 4s infinite ease;
+}
+
+.modal {
+    position: fixed;
+    background-color: white;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 4rem 2rem 2rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    cursor: default;
+    z-index: 2;
+    overflow: scroll;
+}
+
+.modal code {
+    background-color: #EEE;
+    padding: 0.2rem;
+    border-radius: 0.2rem;
+    font-size: 1.1rem;
+}
+
+.modal h1, .modal h2, .modal h3, .modal h4, .modal h5, .modal h6,
+.modal p, .modal ul, .modal ol {
+    box-sizing: border-box;
+    max-width: 30rem;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.modal ul, .modal ol {
+    padding-left: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.modal i {
+    vertical-align: -6%;
+}
+
+.modal > button {
+    border: none;
+    background-color: transparent;
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 1rem;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.modal > button:hover {
+    opacity: 1;
+}
+
+button.stealth {
+    font-size: 1rem;
+    background-color: transparent;
+    color: #888;
+    border: 1px solid #CCC;
+    border-radius: 0.2rem;
+    padding: 0.5rem;
+    margin: 0 auto;
+}
+
+/* -------------------------------------------------------------------------- */
+
+.icon {
+    display: inline-block;
+    height: 16px;
+    width: 16px;
+    background-image: url('../images/sprites.svg');
+    background-size: 16px auto;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.icon.icon-hidden       { background-position: 0px -0px; }
+.icon.icon-visible      { background-position: 0px -16px; }
+.icon.icon-path-closed  { background-position: 0px -32px; }
+.icon.icon-path-open    { background-position: 0px -48px; }
+.icon.icon-radius       { background-position: 0px -64px; }
+.icon.icon-fill-color   { background-position: 0px -80px; }
+.icon.icon-stroke-color { background-position: 0px -96px; }
+.icon.icon-stroke-width { background-position: 0px -112px; }
+.icon.icon-precise-path { background-position: 0px -128px; }
+.icon.icon-path         { background-position: 0px -144px; }
+.icon.icon-circle       { background-position: 0px -160px; }
+.icon.icon-make-precise { background-position: 0px -176px; }
+.icon.icon-make-path    { background-position: 0px -192px; }
+.icon.icon-download     { background-position: 0px -208px; }
+.icon.icon-close        { background-position: 0px -224px; }
+.icon.icon-help         { background-position: 0px -240px; }
+.icon.icon-delete       { background-position: 0px -256px; }
+.icon.icon-undo         { background-position: 0px -272px; }
+.icon.icon-redo         { background-position: 0px -288px; }
+.icon.icon-new          { background-position: 0px -304px; }
+
+.icon-lg {
+    display: inline-block;
+    height: 32px;
+    width: 32px;
+    background-image: url('../images/sprites.svg');
+    background-size: 32px auto;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.icon-lg.icon-hidden       { background-position: 0px -0px; }
+.icon-lg.icon-visible      { background-position: 0px -32px; }
+.icon-lg.icon-path-closed  { background-position: 0px -64px; }
+.icon-lg.icon-path-open    { background-position: 0px -96px; }
+.icon-lg.icon-radius       { background-position: 0px -128px; }
+.icon-lg.icon-fill-color   { background-position: 0px -160px; }
+.icon-lg.icon-stroke-color { background-position: 0px -192px; }
+.icon-lg.icon-stroke-width { background-position: 0px -224px; }
+.icon-lg.icon-precise-path { background-position: 0px -256px; }
+.icon-lg.icon-path         { background-position: 0px -288px; }
+.icon-lg.icon-circle       { background-position: 0px -320px; }
+.icon-lg.icon-make-precise { background-position: 0px -352px; }
+.icon-lg.icon-make-path    { background-position: 0px -384px; }
+.icon-lg.icon-download     { background-position: 0px -416px; }
+.icon-lg.icon-close        { background-position: 0px -448px; }
+.icon-lg.icon-help         { background-position: 0px -480px; }
+.icon-lg.icon-delete       { background-position: 0px -512px; }
+.icon-lg.icon-undo         { background-position: 0px -544px; }
+.icon-lg.icon-redo         { background-position: 0px -576px; }
+.icon-lg.icon-new          { background-position: 0px -608px; }
