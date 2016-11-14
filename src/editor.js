@@ -799,7 +799,7 @@ class Editor {
                    (this.image.height + 1) * scale)
         ctx.lineTo(1 * scale, 1 * scale)
         ctx.stroke()
-        if (scale > 16) {
+        if (scale >= 16) {
             for (let x = 0.5; x < this.image.width; x++)
                 for (let y = 0.5; y < this.image.height; y++) {
                     ctx.beginPath()
