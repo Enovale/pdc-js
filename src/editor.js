@@ -550,6 +550,8 @@ class Editor {
         widthEl.min = 1; widthEl.max = 255; widthEl.value = this.image.width
         widthEl.addEventListener('input', (e) => {
             this.image.width = parseInt(widthEl.value)
+            if (this.image.width > 1024)
+                widthEl.value = this.image.width = 1024
             this.redrawCanvas()
             this.rebuildList()
         })
@@ -560,6 +562,8 @@ class Editor {
         heightEl.min = 1; heightEl.max = 255; heightEl.value = this.image.height
         heightEl.addEventListener('input', (e) => {
             this.image.height = parseInt(heightEl.value)
+            if (this.image.height > 1024)
+                heightEl.value = this.image.height = 1024
             this.redrawCanvas()
             this.rebuildList()
         })
