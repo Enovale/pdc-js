@@ -130,6 +130,7 @@ body {
     padding: 0.5rem;
     flex-grow: 1;
     overflow: scroll;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
 }
@@ -188,6 +189,32 @@ body {
 
 .command-list .slider-row input[type=number] {
     width: 50px;
+}
+
+.command-list .color-row {
+    display: flex;
+    flex-direction: row;
+    margin: 0.5rem -0.5rem 0;
+}
+
+.command-list .color-row > div {
+    margin: 0 0.25rem;
+    padding: 0 0.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.command-list .color-row input[type=range] {
+    vertical-align: middle;
+    width: calc(100% - 0px);
+    margin: 0;
+    -webkit-appearance: none;
+    padding: 0.1rem;
+    border-radius: 0.25rem;
+    margin: 0.1rem 0;
 }
 
 .command-list .selected {

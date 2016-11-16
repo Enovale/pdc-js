@@ -436,6 +436,71 @@ class Editor {
             strokeWidthControlEl.appendChild(strokeWidthEl)
             itemSettings.appendChild(strokeWidthControlEl)
 
+            let colorRow = document.createElement('div')
+            colorRow.classList.add('radius-control', 'color-row')
+
+            const channelShifts = {'a': 6, 'r': 4, 'g': 2, 'b': 0}
+            let channelSliders = {'stroke': {}, 'fill': {}},
+                alphaBoxes = {'stroke': {}, 'fill': {}}
+            for (let colorRegion of ['stroke', 'fill']) {
+                let thisColorRow = document.createElement('div'),
+                    thisColorIcon = this.iconEl(colorRegion + '-color'),
+                    thisRegion = colorRegion
+                thisColorRow.appendChild(thisColorIcon)
+                thisColorIcon.setAttribute('data-balloon',
+                    thisRegion.substring(0, 1).toUpperCase() + thisRegion.substring(1))
+                thisColorIcon.setAttribute('data-balloon-pos', 'right')
+                let thisAlphaBox = document.createElement('input')
+                thisAlphaBox.type = 'checkbox'
+                thisColorRow.appendChild(thisAlphaBox)
+                alphaBoxes[thisRegion] = thisAlphaBox
+                let updateColor = () => {
+                        let sliders = channelSliders[thisRegion],
+                            color = 0
+                        for (let k of Object.keys(sliders))
+                            color |= (parseInt(sliders[k].value) << parseInt(k))
+                        for (let k of Object.keys(sliders))
+                            sliders[k].style.background = 'linear-gradient(to right, ' +
+                                getRGBA(color & ~(0b11 << parseInt(k)) | 0b11 << 6) + ', ' +
+                                getRGBA(color | (0b11 << parseInt(k)) | 0b11 << 6) + ')'
+                        color |= alphaBoxes[thisRegion].checked ? 0b11000000 : 0
+                        if (thisRegion == 'stroke') {
+                            command.strokeColor = color
+                        } else {
+                            command.fillColor = color
+                        }
+                        this.redrawCanvas()
+                    },
+                    changeColor = () => {
+                        updateColor()
+                        this.replaceHistoryStateIfReasonOrPush(thisRegion + 'Color' + i)
+                    }
+                thisAlphaBox.addEventListener('change', changeColor)
+                thisAlphaBox.checked = command
+                if (colorRegion == 'stroke')
+                    thisAlphaBox.checked = (command.strokeColor >> channelShifts.a)
+                                           & 0b11 ? true : false
+                else
+                    thisAlphaBox.checked = (command.fillColor >> channelShifts.a)
+                                           & 0b11 ? true : false
+                for (let channel of ['r', 'g', 'b']) {
+                    let channelSlider = document.createElement('input'),
+                        channelShift = channelShifts[channel]
+                    channelSliders[colorRegion][channelShift] = channelSlider
+                    channelSlider.type = 'range'; channelSlider.min = 0
+                    channelSlider.max = 3; channelSlider.step = 1;
+                    thisColorRow.appendChild(channelSlider)
+                    if (colorRegion == 'stroke')
+                        channelSlider.value = (command.strokeColor >> channelShift) & 0b11
+                    else
+                        channelSlider.value = (command.fillColor >> channelShift) & 0b11
+                    channelSlider.addEventListener('input', changeColor)
+                }
+                colorRow.appendChild(thisColorRow)
+                updateColor()
+            }
+            itemSettings.appendChild(colorRow)
+
             itemSettings.addEventListener('click', e => e.stopPropagation())
 
             itemEl.draggable = true
@@ -740,7 +805,7 @@ class Editor {
         for (let command of this.image.commands) {
             command.draw(ctx, scale, this.canvasOffset)
         }
-        if (this.selectedCommand !== null) {
+        if (this.selectedCommand !== null && this.image.commands[this.selectedCommand]) {
             let closestPoint,
                 command = this.image.commands[this.selectedCommand],
                 selectablePoints = command.points,
