@@ -1,7 +1,11 @@
 'use strict';
 
 let getRGBA = function(pebbleColor) {
-    // pebbleColor: Number
+    // pebbleColor: Number (0..255)
+    // ---
+    // Returns: String
+    // ---
+    // Converts the 8-bit AARRGGBB value to a CSS rgba() string
     return 'rgba(' + (pebbleColor >> 4 & 3) / 3 * 255 + ',' +
                      (pebbleColor >> 2 & 3) / 3 * 255 + ',' +
                      (pebbleColor >> 0 & 3) / 3 * 255 + ',' +
@@ -17,6 +21,9 @@ class PDCCommand {
         this.points = []
     }
     toString() {
+        // Returns: String
+        // ---
+        // Debug ouput
         return '-=-=-=- ' + this.constructor.name + ' -=-=-=-' +
              '\nHidden: ' + this.flags.hidden +
              '\nStroke Color: ' + this.strokeColor +
@@ -31,17 +38,19 @@ class PDCCommand {
     getFriendlyName() {
         return 'Generic Command'
     }
-    getTextRepresentation() {
-        return this.getFriendlyName()
-    }
     setOwnStyleOntoContext(ctx, scale) {
         // ctx: CanvasRenderingContext2D
         // scale: Number
+        // ---
+        // Sets a CanvasRenderingContext2D to the command's style
         ctx.strokeStyle = getRGBA(this.strokeColor)
         ctx.lineWidth = this.strokeWidth * scale
         ctx.fillStyle = getRGBA(this.fillColor)
     }
     equals(cmd) {
+        // cmd: PDCCommand
+        // ---
+        // Returns `true` if the commands have the same content, `false` otherwise
         if (cmd.fillColor != this.fillColor ||
             cmd.strokeColor != this.strokeColor ||
             cmd.strokeWidth != this.strokeWidth ||
@@ -72,6 +81,7 @@ class PDCCircleCommand extends PDCCommand {
         this.radius = 0
     }
     clone() {
+        // Clones the command.
         let c = new PDCCircleCommand()
         c.flags = {'hidden': this.flags.hidden}
         c.radius = this.radius
@@ -114,6 +124,7 @@ class PDCPathCommand extends PDCCommand {
         return 'path'
     }
     clone() {
+        // Clones the command.
         let c = new PDCPathCommand()
         c.flags = {'hidden': this.flags.hidden}
         c.pathOpen = this.pathOpen
@@ -129,7 +140,9 @@ class PDCPathCommand extends PDCCommand {
         // ctx: CanvasRenderingContext2D
         // scale: Number
         // offset: [Number, Number] -- optional
-        // force: Boolean
+        // force: Boolean -- `true` to draw even if the command is set to hidden
+        // ---
+        // Draws the command onto a context (respecting scale and offset)
         if (this.flags.hidden && !force) return
         if (!offset) offset = [0, 0]
         this.setOwnStyleOntoContext(ctx, scale)
@@ -149,6 +162,7 @@ class PDCPathCommand extends PDCCommand {
         ctx.stroke()
     }
     toPrecise() {
+        // Converts the path to a precise path
         var p = new PDCPrPathCommand()
         p.pathOpen = this.pathOpen
         p.flags = this.flags
@@ -168,6 +182,7 @@ class PDCPrPathCommand extends PDCPathCommand {
         return 'precise-path'
     }
     clone() {
+        // Clones the command.
         let c = new PDCPrPathCommand()
         c.flags = {'hidden': this.flags.hidden}
         c.pathOpen = this.pathOpen
@@ -180,6 +195,7 @@ class PDCPrPathCommand extends PDCPathCommand {
         return c
     }
     toPath() {
+        // Converts the precise path to a path (rounding point locations)
         var p = new PDCPathCommand()
         p.pathOpen = this.pathOpen
         p.flags = this.flags
@@ -199,6 +215,7 @@ class PDCImage {
         this.commands = []
     }
     clone() {
+        // Clones the image.
         var img = new PDCImage()
         img.height = this.height
         img.width = this.width
@@ -208,6 +225,9 @@ class PDCImage {
         return img
     }
     equals(img) {
+        // img: PDCImage
+        // ---
+        // Returns `true` if the images have the same content, `false` otherwise
         if (img.height != this.height ||
             img.width != this.width ||
             img.version != this.version ||
@@ -219,8 +239,9 @@ class PDCImage {
         return true
     }
     getBinaryRepresentation() {
+        // Returns a PDC image file as a binary string.
         let gen = new PDCGenerator()
-        return gen.binarizeImage(this)
+        return gen.generateDrawCommandImageFile(this)
     }
 }
 
@@ -231,7 +252,9 @@ class PDCGenerator {
     constructor() {
     }
     generateDrawCommandImage(img) {
-        // https://developer.pebble.com/guides/app-resources/pdc-format/#pebble-draw-command-image
+        // img: PDCImage
+        // ---
+        // Returns binary Image data.
         let output = [img.version, 0]
         output = output.concat(this.int(img.width, 2, 'u'))
         output = output.concat(this.int(img.height, 2, 'u'))
@@ -258,7 +281,11 @@ class PDCGenerator {
         }
         return output
     }
-    binarizeImage(img) {
+    generateDrawCommandImageFile(img) {
+        // img: PDCImage
+        // ---
+        // Converts a PDCImage to a binary representation (ImageFile; which
+        //     contains a magic word + data length + data.)
         let output = this.b('PDCI'),
             data = this.generateDrawCommandImage(img)
         output = output.concat(this.int(data.length, 4, 'u'))
@@ -266,11 +293,16 @@ class PDCGenerator {
         return this.c(output)
     }
     int(num, bytes, format) {
+        // num: number to binarize
+        // bytes: amount of bytes to pack the int into
+        // format: 'u' or 'i' -> unsigned or signed int, respectively
+        // ---
+        // Converts a number to a little-endian binary representation
         num = Math.round(num)
         if (bytes == 1 && format == 'u')
             return [num & 0xFF]
         if (bytes == 1 && format == 'i')
-            return [((num % 128) + 256)  & 0xFF]
+            return [((num % 128) + 256) & 0xFF]
         if (bytes == 2 && format == 'u')
             return [num % 256, num >> 8]
         if (bytes == 2 && format == 'i')
@@ -279,12 +311,19 @@ class PDCGenerator {
             return [num % 256, num >> 8, num >> 16, num >> 24]
     }
     b(str) {
+        // str: String [ascii]
+        // ---
+        // Converts a string to an array of 0..126 values.
+        // Currently only handles ASCII values.
         let out = []
         for (let c of str)
             out.push(c.charCodeAt(0))
         return out
     }
     c(arr) {
+        // arr: Array of 0..255 values.
+        // ---
+        // Converts an array of 0..255 values to a binary string.
         let str = []
         for (let c of arr)
             str.push(String.fromCharCode(c))
