@@ -97,7 +97,7 @@ body {
     margin: auto;
     flex-grow: 0;
     flex-shrink: 0;
-    cursor: default;
+    cursor: crosshair;
 }
 
 .sidebar {
