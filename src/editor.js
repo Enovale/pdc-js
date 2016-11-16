@@ -469,10 +469,11 @@ class Editor {
                         } else {
                             command.fillColor = color
                         }
-                        this.redrawCanvas()
                     },
                     changeColor = () => {
                         updateColor()
+                        this.redrawCanvas()
+                        this.redrawCommandCanvas(command, itemCanvas)
                         this.replaceHistoryStateIfReasonOrPush(thisRegion + 'Color' + i)
                     }
                 thisAlphaBox.addEventListener('change', changeColor)
