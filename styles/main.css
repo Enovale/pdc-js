@@ -419,6 +419,7 @@ button.stealth {
 .icon.icon-undo         { background-position: 0px -272px; }
 .icon.icon-redo         { background-position: 0px -288px; }
 .icon.icon-new          { background-position: 0px -304px; }
+.icon.icon-upload       { background-position: 0px -320px; }
 
 .icon-lg {
     display: inline-block;
@@ -450,3 +451,4 @@ button.stealth {
 .icon-lg.icon-undo         { background-position: 0px -544px; }
 .icon-lg.icon-redo         { background-position: 0px -576px; }
 .icon-lg.icon-new          { background-position: 0px -608px; }
+.icon-lg.icon-upload       { background-position: 0px -640px; }

@@ -19,6 +19,11 @@ class Picker {
         this.newButton.setAttribute('data-balloon-pos', 'down')
         this.newButton.innerHTML = '<i class="icon icon-new"></i>'
         this.el.appendChild(this.newButton)
+        this.openButton = document.createElement('button')
+        this.openButton.setAttribute('data-balloon', 'Open')
+        this.openButton.setAttribute('data-balloon-pos', 'down')
+        this.openButton.innerHTML = '<i class="icon icon-upload"></i>'
+        this.el.appendChild(this.openButton)
         this.saveButton = document.createElement('button')
         this.saveButton.setAttribute('data-balloon', 'Save')
         this.saveButton.setAttribute('data-balloon-pos', 'down')
@@ -101,13 +106,28 @@ class Picker {
         }, false)
         this.saveButton.addEventListener('click', e => {
             e.stopPropagation()
-            let ua = navigator.userAgent.toLowerCase(),
-                data = 'data:application/octet-stream;base64,' + btoa(this.dataSource()),
+            let data = 'data:application/octet-stream;base64,' + btoa(this.dataSource()),
                 fakeLink = document.createElement('a')
             fakeLink.href = data
             fakeLink.setAttribute('download', this.fileName + '.pdc')
             let event = new MouseEvent('click')
             fakeLink.dispatchEvent(event)
+        }, false)
+        this.openButton.addEventListener('click', e => {
+            e.stopPropagation()
+            let fakeInput = document.createElement('input')
+            document.body.appendChild(fakeInput)
+            fakeInput.setAttribute('type', 'file')
+            fakeInput.click()
+            fakeInput.addEventListener('change', e => {
+                if (fakeInput.files.length == 1) {
+                    let reader = new FileReader(),
+                        name = fakeInput.files[0].name
+                    reader.readAsBinaryString(fakeInput.files[0])
+                    reader.addEventListener('load',
+                        () => this.loadData(reader.result, name))
+                }
+            })
         }, false)
         this.newButton.addEventListener('click', e => {
             e.stopPropagation()

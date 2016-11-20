@@ -48,10 +48,16 @@ function showHelp() {
         <p></p>\
         '
     helpDialog.querySelector('.close-modal').addEventListener('click', e => {
-        helpDialog.parentNode.removeChild(helpDialog)
+        closeHelp()
     })
     helpDialog.querySelector('p:last-of-type').appendChild(generateExampleFileLoader())
     document.body.appendChild(helpDialog)
+}
+
+function closeHelp() {
+    let helpDialogs = document.querySelectorAll('.help-modal')
+    for (let helpDialog of helpDialogs)
+        helpDialog.parentNode.removeChild(helpDialog)
 }
 
 function generateExampleFileLoader() {
