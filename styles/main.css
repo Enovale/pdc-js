@@ -1,8 +1,18 @@
+html {
+    overflow: hidden;
+    position: fixed;
+}
+
 body {
     font-family: -apple-system, ".SFNSDisplay-Regular", BlinkMacSystemFont, "Helvetica Neue", sans-serif;
     margin: 0;
-    min-height: 100vh;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
+    position: fixed;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
 }
 
 #main {
@@ -322,9 +332,6 @@ li:not(.selected) .item-settings {
     bottom: 0;
     left: 0;
     padding: 4rem 2rem 2rem;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
     cursor: default;
     z-index: 2;
     overflow: scroll;
