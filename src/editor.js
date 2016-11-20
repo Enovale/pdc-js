@@ -67,6 +67,8 @@ class Editor {
         this.future = []
         this.imageChangeReason = null
         this.canvasScale = 8
+        this.selectedCommand = null
+        this.movingPoint = null
         this.rebuildChrome()
     }
     pushHistoryState() {
