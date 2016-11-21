@@ -6,8 +6,8 @@ function generateHelpButton() {
     helpButton.innerHTML = '<i class="icon icon-help"></i>'
     helpButton.addEventListener('click', e => {
         helpButton.classList.remove('pinging')
-        e.stopPropagation();
-        showHelp();
+        e.stopPropagation()
+        showHelp()
     }, false)
     return helpButton
 }

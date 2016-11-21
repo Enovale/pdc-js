@@ -491,7 +491,7 @@ class Editor {
                         channelShift = channelShifts[channel]
                     channelSliders[colorRegion][channelShift] = channelSlider
                     channelSlider.type = 'range'; channelSlider.min = 0
-                    channelSlider.max = 3; channelSlider.step = 1;
+                    channelSlider.max = 3; channelSlider.step = 1
                     thisColorRow.appendChild(channelSlider)
                     if (colorRegion == 'stroke')
                         channelSlider.value = (command.strokeColor >> channelShift) & 0b11
