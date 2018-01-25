@@ -789,7 +789,7 @@ class Editor {
         this.canvas.style.width = (this.image.width + 2) * this.canvasScale + 'px'
         let ctx = this.canvas.getContext('2d'),
             scale = this.canvasScale * this.pixelRatio
-        this.canvasOffset = [scale * 1.5, scale * 1.5]
+        this.canvasOffset = [0, 0]
         if (this.selectedCommand !== null) {
             if (ev && this.movingPoint !== null && 'offsetX' in ev) {
                 let command = this.image.commands[this.selectedCommand],
