@@ -334,6 +334,9 @@ class PDCGenerator {
 class PDCParser {
     constructor() {
     }
+    isPDC(binary) {
+        return this.readMagicWord(binary) == 'PDCI';
+    }
     parse(binary) {
         if (this.readMagicWord(binary) != 'PDCI')
             throw Error('Unsupported magic word')

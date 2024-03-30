@@ -76,9 +76,24 @@ class Editor {
     updateEditorFromData(data) {
         // Loads a binary string and replaces the editor's content with it.
         // data: String
-        console.log(data)
-        let pdcParser = new PDCParser()
-        this.updateEditor(pdcParser.parse(data))
+        console.log(data);
+        
+        let pdcParser = new PDCParser();
+        let svgParser = new SVGParser();
+        let image;
+        if (pdcParser.isPDC(data)) {
+            image = pdcParser.parse(data);
+        } else if (svgParser.isSVG(data)) {
+            image = svgParser.parse(data);
+        } else {
+            throw Error("Invalid file uploaded!");
+        }
+
+        if (image == null) {
+            throw Error("Parsing failed.");
+        }
+        
+        this.updateEditor(image);
     }
     updateEditor(image) {
         this.el.classList.remove('empty')
