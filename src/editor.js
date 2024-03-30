@@ -76,7 +76,6 @@ class Editor {
     updateEditorFromData(data) {
         // Loads a binary string and replaces the editor's content with it.
         // data: String
-        console.log(data);
         
         let pdcParser = new PDCParser();
         let svgParser = new SVGParser();

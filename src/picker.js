@@ -121,9 +121,11 @@ class Picker {
             fakeInput.click()
             fakeInput.addEventListener('change', e => {
                 if (fakeInput.files.length == 1) {
-                    let reader = new FileReader(),
-                        name = fakeInput.files[0].name
-                    reader.readAsBinaryString(fakeInput.files[0])
+                    let reader = new FileReader();
+                    let file = fakeInput.files[0];
+                    let dotLastIndex = file.name.lastIndexOf('.');
+                    let name = file.name.substring(0, dotLastIndex);
+                    reader.readAsBinaryString(file)
                     reader.addEventListener('load',
                         () => this.loadData(reader.result, name))
                 }

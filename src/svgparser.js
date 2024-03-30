@@ -51,6 +51,28 @@ let comparePoints = function(a, b) {
     return a.values[0] == b.values[0] && a.values[1] == b.values[1];
 }
 
+let addPoints = function(a, b) {
+    return [a[0] + b[0], a[1] + b[1]];
+}
+
+let normalizeColor = function(str) {
+    if (!str || str == "") {
+        return null;
+    }
+
+    let r, g, b;
+    if (str.startsWith("#")) {
+        let rgb = parseInt(str.slice(1, 7), 16);
+        [r, g, b] = [(rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF];
+    } else if (str.startsWith("rgb(")) {
+        [r, g, b] = str.match(/[\d\.]{1,3}/g);
+    } else {
+        return null;
+    }
+
+    return [r, g, b];
+}
+
 class SVGParser {
     constructor() {
         this.xmlDoc = null;
@@ -61,12 +83,12 @@ class SVGParser {
         this.groupStrokeOpacity;
         this.groupStrokeWidth;
         this.parserMap = {
-            path: this.parsePath,
-            circle: this.parseCircle,
-            polyline: this.parsePolyLine,
-            polygon: this.parsePolygon,
-            line: this.parseLine,
-            rect: this.parseRect
+            path: this.parsePath.bind(this),
+            circle: this.parseCircle.bind(this),
+            polyline: this.parsePolyLine.bind(this),
+            polygon: this.parsePolygon.bind(this),
+            line: this.parseLine.bind(this),
+            rect: this.parseRect.bind(this)
         }
     }
     isSVG(text) {
@@ -126,9 +148,9 @@ class SVGParser {
             if (child.nodeName == "layer" || child.nodeName == "g") {
                 if (child.nodeName == "g") {
                     this.groupOpacity = attr(child, "opacity");
-                    this.groupFill = attr(child, "fill")?.match(/[\d\.]{1,3}/g);
+                    this.groupFill = normalizeColor(attr(child, "fill"));
                     this.groupFillOpacity = attr(child, "fill-opacity");
-                    this.groupStroke = attr(child, "stroke")?.match(/[\d\.]{1,3}/g);
+                    this.groupStroke = normalizeColor(attr(child, "stroke"));
                     this.groupStrokeOpacity = attr(child, "stroke-opacity");
                     this.groupStrokeWidth = attr(child, "stroke-width");
 
@@ -164,14 +186,14 @@ class SVGParser {
     createCommand(translate, element, truncateColor = true) {
         let style = element["style"];
         let attributes = element;
-        if (style) {
+        if (style && style.length > 0) {
             attributes = style;
         }
 
         let opacity = attr(attributes, "opacity");
-        let stroke = attr(attributes, "stroke")?.match(/[\d\.]{1,3}/g);
+        let stroke = normalizeColor(attr(attributes, "stroke"));
         let strokeOpacity = attr(attributes, "stroke-opacity");
-        let fill = attr(attributes, "fill")?.match(/[\d\.]{1,3}/g);
+        let fill = normalizeColor(attr(attributes, "fill"));
         let fillOpacity = attr(attributes, "fill-opacity");
         
         opacity ??= this.groupOpacity;
@@ -273,7 +295,7 @@ class SVGParser {
         }
         
         let last = path[path.length - 1];
-        let pathOpen = !"Zz".includes(last.type);
+        let pathOpen = last.type != "Z";
 
         if (pathOpen) {
             path.slice(0, path.lenth - 1);
@@ -289,16 +311,93 @@ class SVGParser {
 
         let points = [];
         for (let i = 0; i < path.length; i++) {
+            // Might need to implement svg2pdc.py:convert_to_pebble_coordinates
+            // But it seems to work so I'll wait until a non-working example shows up
             points.push(path[i].values);
         }
 
-        var p = new PDCPrPathCommand();
+        let p = new PDCPrPathCommand();
         p.flags = {'hidden': false};
         p.pathOpen = pathOpen;
         p.strokeColor = strokeColor;
         p.strokeWidth = strokeWidth;
         p.fillColor = fillColor;
         p.points = points;
+        return p;
+    }
+    parseCircle(element, translate, strokeWidth, strokeColor, fillColor) {
+        let c = new PDCCircleCommand();
+        let cx = parseFloat(attr(element, "cx"));
+        let cy = parseFloat(attr(element, "cy"));
+        c.radius = parseFloat(attr(element, "r")) ?? parseFloat(attr(element, "z"));
+
+        if (!cx || !cy || !c.radius || isNaN(cx) || isNaN(cy) || isNaN(c.radius)) {
+            console.warn("Unrecognized circle format");
+            return null;
+        }
+
+        c.flags = {'hidden': false};
+        c.strokeColor = strokeColor;
+        c.strokeWidth = strokeWidth;
+        c.fillColor = fillColor;
+        c.points = [[cx, cy]];
+
+        return c;
+    }
+    parsePolyLine(element, translate, strokeWidth, strokeColor, fillColor) {
+        return this.getPolygonFromElement(element, translate, strokeWidth, strokeColor, fillColor, true);
+    }
+    parsePolygon(element, translate, strokeWidth, strokeColor, fillColor) {
+        return this.getPolygonFromElement(element, translate, strokeWidth, strokeColor, fillColor, false);
+    }
+    parseLine(element, translate, strokeWidth, strokeColor, fillColor) {
+        let points = [[element.x1.baseVal.value, element.y1.baseVal.value], [element.x2.baseVal.value, element.y2.baseVal.value]];
+
+        let p = new PDCPrPathCommand();
+        p.flags = {'hidden': false};
+        p.pathOpen = true;
+        p.strokeColor = strokeColor;
+        p.strokeWidth = strokeWidth;
+        p.fillColor = fillColor;
+        p.points = points;
+        
+        return p;
+    }
+    parseRect(element, translate, strokeWidth, strokeColor, fillColor) {
+        let [origin, width, height] = [[element.x.baseVal.value, element.y.baseVal.value], element.width.baseVal.value, element.height.baseVal.value];
+
+        let points = [origin, addPoints(origin, [width, 0]), addPoints(origin, [width, height]),
+                      addPoints(origin, [0, height])];
+
+        let p = new PDCPrPathCommand();
+        p.flags = {'hidden': false};
+        p.pathOpen = false;
+        p.strokeColor = strokeColor;
+        p.strokeWidth = strokeWidth;
+        p.fillColor = fillColor;
+        p.points = points;
+
+        return p;
+    }
+    getPolygonFromElement(element, translate, strokeWidth, strokeColor, fillColor, pathOpen) {
+        let points = [];
+        for (let i = 0; i < element.points.length; i++) {
+            let point = element.points[i];
+            points.push([point.x, point.y]);
+        }
+
+        if (points.length <= 0) {
+            return null;
+        }
+
+        let p = new PDCPrPathCommand();
+        p.flags = {'hidden': false};
+        p.pathOpen = pathOpen;
+        p.strokeColor = strokeColor;
+        p.strokeWidth = strokeWidth;
+        p.fillColor = fillColor;
+        p.points = points;
+
         return p;
     }
 }
