@@ -24,10 +24,30 @@ class Editor {
 
         window.addEventListener('keydown', e => {
             this.altPressed = e.altKey || e.metaKey;
-            this.shiftPressed = e.shiftKey || e.ctrlKey; this.redrawCanvas()})
+            this.shiftPressed = e.shiftKey || e.ctrlKey;
+
+            switch (e.key) {
+                case "ArrowLeft":
+                    this.moveCommand(-1, 0);
+                    break;
+                case "ArrowUp":
+                    this.moveCommand(0, -1);
+                    break;
+                case "ArrowRight":
+                    this.moveCommand(1, 0);
+                    break;
+                case "ArrowDown":
+                    this.moveCommand(0, 1);
+                    break;
+            }
+
+            this.redrawCanvas();
+        })
         window.addEventListener('keyup', e => {
             this.altPressed = e.altKey || e.metaKey;
-            this.shiftPressed = e.shiftKey || e.ctrlKey; this.redrawCanvas()})
+            this.shiftPressed = e.shiftKey || e.ctrlKey;
+            this.redrawCanvas();
+        })
         window.addEventListener('keypress', e => {
             if (e.charCode == 122 && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
                 // Cmd-Z or Ctrl-Z
@@ -109,6 +129,19 @@ class Editor {
 
             this.redrawCanvas()
             this.rebuildList()
+        }
+    }
+    moveCommand(x, y) {
+        let command = this.image.commands[this.selectedCommand];
+
+        if (command == null) {
+            console.log("Make sure to select a command");
+            return;
+        }
+
+        for (let i = 0; i < command.points.length; i++) {
+            command.points[i][0] += x;
+            command.points[i][1] += y;
         }
     }
     rebuildChrome() {
