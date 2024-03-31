@@ -48,10 +48,18 @@ let attr = function(element, name) {
 }
 
 let comparePoints = function(a, b) {
+    if (!a || !b) {
+        return false;
+    }
+
     return a.values[0] == b.values[0] && a.values[1] == b.values[1];
 }
 
 let addPoints = function(a, b) {
+    if (!a || !b) {
+        return null;
+    }
+
     return [a[0] + b[0], a[1] + b[1]];
 }
 
@@ -123,7 +131,7 @@ class SVGParser {
         console.log(this.xmlDoc.documentElement);
 
         let viewBox = this.getViewBox(this.xmlDoc.documentElement);
-        let translate = new Vector2(-viewBox.x, -viewBox.y);
+        let translate = [-viewBox.baseVal.x, -viewBox.baseVal.y];
         let commands = this.parseCommands(this.xmlDoc.documentElement, translate);
         
         console.log(commands);
@@ -161,18 +169,19 @@ class SVGParser {
 
                     let transform = attr(child, "transform");
                     if (transform.baseVal.length > 0) {
-                        throw Error("You've found an SVG that actually uses this transform thing that's in the pebble code. Send it to me.")
+                        console.log("Dealing with transform=translate...");
+                        translate = addPoints(translate, this.getTranslateFromTransform(transform)) ?? translate;
                     }
                 }
                 let childTranslate = this.getTranslate(child);
-                translate = new Vector2(translate.x + childTranslate.x, translate.y + childTranslate.y);
+                translate = addPoints(translate, childTranslate);
                 let cmdList = this.parseCommands(child, translate, truncateColor);
                 commands = commands.concat(cmdList);
             } else {
                 let childTranslate = translate;
                 let transform = attr(child, "transform");
                 if (transform && transform.baseVal.length > 0) {
-                    throw Error("SVG Transform error but the second time, please send me your SVG.");
+                    childTranslate = addPoints(translate, this.getTranslateFromTransform(transform)) ?? translate;
                 }
                 let c = this.createCommand(childTranslate, child, truncateColor);
                 if (c) {
@@ -275,17 +284,26 @@ class SVGParser {
             return new SVGRect(0, 0, attr(root, "width"), attr(root, "height"));
         }
     }
+    // TODO DOESNT WORK
     getTranslate(group) {
-        let translate = attr(group, "translate");
-        if (translate) {
-            throw Error("Please send me this SVG that seems to have a translate in it.");
-            let pos = group.getElementsByTagName("translate");
-            if (pos != null && pos.length > 0 && pos[0] != null){
-                pos = pos[0];
+        let transform = attr(group, "transform");
+        let translate = [0, 0];
+        if (transform && transform.baseVal.length > 0) {
+            translate = this.getTranslateFromTransform(transform) ?? translate;
+        }
+
+        return translate;
+    }
+    getTranslateFromTransform(transform) {
+        for (let j = 0; j < transform.baseVal.length; j++) {
+            let transformation = transform.baseVal[j];
+            if (transformation.type == 2) {
+                let matrix = transformation.matrix;
+                return [matrix.e, matrix.f];
             }
         }
 
-        return new Vector2(0, 0);
+        return null;
     }
     parsePath(element, translate, strokeWidth, strokeColor, fillColor) {
         let path = element.getPathData({normalize: true});
@@ -399,12 +417,5 @@ class SVGParser {
         p.points = points;
 
         return p;
-    }
-}
-
-class Vector2 {
-    constructor(x, y) {
-        this.x;
-        this.y;
     }
 }

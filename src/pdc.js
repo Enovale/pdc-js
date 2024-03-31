@@ -163,7 +163,7 @@ class PDCPathCommand extends PDCCommand {
     }
     toPrecise() {
         // Converts the path to a precise path
-        var p = new PDCPrPathCommand()
+        let p = new PDCPrPathCommand()
         p.pathOpen = this.pathOpen
         p.flags = this.flags
         p.strokeColor = this.strokeColor
@@ -196,7 +196,7 @@ class PDCPrPathCommand extends PDCPathCommand {
     }
     toPath() {
         // Converts the precise path to a path (rounding point locations)
-        var p = new PDCPathCommand()
+        let p = new PDCPathCommand()
         p.pathOpen = this.pathOpen
         p.flags = this.flags
         p.strokeColor = this.strokeColor
@@ -216,7 +216,7 @@ class PDCImage {
     }
     clone() {
         // Clones the image.
-        var img = new PDCImage()
+        let img = new PDCImage()
         img.height = this.height
         img.width = this.width
         img.version = this.version
