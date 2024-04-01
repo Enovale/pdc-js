@@ -55,6 +55,15 @@ let comparePoints = function(a, b) {
     return a.values[0] == b.values[0] && a.values[1] == b.values[1];
 }
 
+let addPointArray = function(arr, d) {
+    let array = arr;
+    for (let i = 0; i < arr.length; i++) {
+        array[i] = addPoints(arr[i], d);
+    }
+
+    return array;
+}
+
 let addPoints = function(a, b) {
     if (!a || !b) {
         return null;
@@ -166,23 +175,12 @@ class SVGParser {
                         this.groupStrokeWidth = parseInt(this.groupStrokeWidth.filter(c => '0123456789.'.contains(c)));
                         this.groupStrokeWidth = this.groupStrokeWidth >= 1 ? this.groupStrokeWidth : 1;
                     }
-
-                    let transform = attr(child, "transform");
-                    if (transform.baseVal.length > 0) {
-                        console.log("Dealing with transform=translate...");
-                        translate = addPoints(translate, this.getTranslateFromTransform(transform)) ?? translate;
-                    }
                 }
-                let childTranslate = this.getTranslate(child);
-                translate = addPoints(translate, childTranslate);
-                let cmdList = this.parseCommands(child, translate, truncateColor);
+                let childTranslate = addPoints(translate, this.getTranslate(child));
+                let cmdList = this.parseCommands(child, childTranslate, truncateColor);
                 commands = commands.concat(cmdList);
             } else {
-                let childTranslate = translate;
-                let transform = attr(child, "transform");
-                if (transform && transform.baseVal.length > 0) {
-                    childTranslate = addPoints(translate, this.getTranslateFromTransform(transform)) ?? translate;
-                }
+                let childTranslate = addPoints(translate, this.getTranslate(child));
                 let c = this.createCommand(childTranslate, child, truncateColor);
                 if (c) {
                     commands.push(c);
@@ -284,7 +282,6 @@ class SVGParser {
             return new SVGRect(0, 0, attr(root, "width"), attr(root, "height"));
         }
     }
-    // TODO DOESNT WORK
     getTranslate(group) {
         let transform = attr(group, "transform");
         let translate = [0, 0];
@@ -329,9 +326,7 @@ class SVGParser {
 
         let points = [];
         for (let i = 0; i < path.length; i++) {
-            // Might need to implement svg2pdc.py:convert_to_pebble_coordinates
-            // But it seems to work so I'll wait until a non-working example shows up
-            points.push(path[i].values);
+            points.push(addPoints(path[i].values, translate));
         }
 
         let p = new PDCPrPathCommand();
@@ -358,7 +353,7 @@ class SVGParser {
         c.strokeColor = strokeColor;
         c.strokeWidth = strokeWidth;
         c.fillColor = fillColor;
-        c.points = [[cx, cy]];
+        c.points = [addPoints([cx, cy], translate)];
 
         return c;
     }
@@ -369,7 +364,8 @@ class SVGParser {
         return this.getPolygonFromElement(element, translate, strokeWidth, strokeColor, fillColor, false);
     }
     parseLine(element, translate, strokeWidth, strokeColor, fillColor) {
-        let points = [[element.x1.baseVal.value, element.y1.baseVal.value], [element.x2.baseVal.value, element.y2.baseVal.value]];
+        let points = [[element.x1.baseVal.value, element.y1.baseVal.value],
+                      [element.x2.baseVal.value, element.y2.baseVal.value]];
 
         let p = new PDCPrPathCommand();
         p.flags = {'hidden': false};
@@ -377,7 +373,7 @@ class SVGParser {
         p.strokeColor = strokeColor;
         p.strokeWidth = strokeWidth;
         p.fillColor = fillColor;
-        p.points = points;
+        p.points = addPointArray(points, translate);
         
         return p;
     }
@@ -393,7 +389,7 @@ class SVGParser {
         p.strokeColor = strokeColor;
         p.strokeWidth = strokeWidth;
         p.fillColor = fillColor;
-        p.points = points;
+        p.points = addPointArray(points, translate);
 
         return p;
     }
@@ -414,7 +410,7 @@ class SVGParser {
         p.strokeColor = strokeColor;
         p.strokeWidth = strokeWidth;
         p.fillColor = fillColor;
-        p.points = points;
+        p.points = addPointArray(points, translate);
 
         return p;
     }
