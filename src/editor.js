@@ -1,5 +1,18 @@
 'use strict';
 
+var centerOfPoints = function (points) {
+    var centroid = [0, 0];
+    for (var i = 0; i < points.length; i++) {
+        var point = points[i];
+        centroid[0] += point[0];
+        centroid[1] += point[1];
+    }
+    centroid[0] /= points.length;
+    centroid[1] /= points.length;
+    return centroid;
+}
+
+
 class Editor {
     constructor(args) {
         this.selectedCommand = null
@@ -49,7 +62,13 @@ class Editor {
             this.redrawCanvas();
         })
         window.addEventListener('keypress', e => {
-            if (e.charCode == 122 && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
+            if (e.charCode == 95) {
+                this.scaleCommand(0.5);
+                this.redrawCanvas();
+            } else if (e.charCode == 43) {
+                this.scaleCommand(2);
+                this.redrawCanvas();
+            } else if (e.charCode == 122 && (e.metaKey || e.ctrlKey) && !e.shiftKey) {
                 // Cmd-Z or Ctrl-Z
                 this.undo()
                 e.preventDefault()
@@ -156,6 +175,23 @@ class Editor {
         for (let i = 0; i < command.points.length; i++) {
             command.points[i][0] += x;
             command.points[i][1] += y;
+        }
+    }
+    scaleCommand(scale) {
+        let command = this.image.commands[this.selectedCommand];
+
+        if (command == null) {
+            console.log("Make sure to select a command");
+            return;
+        }
+
+        let center = centerOfPoints(command.points);
+
+        for (let i = 0; i < command.points.length; i++) {
+            let point = command.points[i];
+            let relative = [point[0] - center[0], point[1] - center[1]];
+            command.points[i][0] = center[0] + (relative[0] * scale);
+            command.points[i][1] = center[1] + (relative[1] * scale);;
         }
     }
     rebuildChrome() {
